@@ -89,9 +89,12 @@ class MazeEnv(gym.Env):
 
         return self.state, reward, done, info
 
-    def reset(self):
-        self.maze_view.reset_robot()
-        self.state = np.zeros(2)
+    def reset(self, **kwargs):
+        self.maze_view.reset_robot(**kwargs)
+        if kwargs == {}:
+            self.state = np.zeros(2)
+        else:
+            self.state = kwargs['reset_position']
         self.steps_beyond_done = None
         self.done = False
         return self.state

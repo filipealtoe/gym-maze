@@ -94,7 +94,7 @@ class MazeView2D:
             raise ValueError("dir cannot be %s. The only valid dirs are %s."
                              % (str(dir), str(self.__maze.COMPASS.keys())))
 
-        if self.__maze.is_open(self.__robot, dir):
+        if self.__maze.is_open(self.__robot, dir, self.__goal):
 
             # update the drawing
             self.__draw_robot(transparency=0)
@@ -106,10 +106,14 @@ class MazeView2D:
                 self.__robot = np.array(self.maze.get_portal(tuple(self.robot)).teleport(tuple(self.robot)))
             self.__draw_robot(transparency=255)
 
-    def reset_robot(self):
+    def reset_robot(self, **kwargs):
 
         self.__draw_robot(transparency=0)
-        self.__robot = np.zeros(2, dtype=int)
+        if kwargs == {}:
+            self.__robot = np.zeros(2, dtype=int)
+        else:
+            reset_position = kwargs['reset_position'].astype(int)
+            self.__robot = reset_position
         self.__draw_robot(transparency=255)
 
     def __controller_update(self):
@@ -439,10 +443,13 @@ class Maze:
             for portal_location in portal_locations:
                 self.__portals_dict[portal_location] = portal
 
-    def is_open(self, cell_id, dir):
+    def is_open(self, cell_id, dir, goal=None):
         # check if it would be out-of-bound
         x1 = cell_id[0] + self.COMPASS[dir][0]
         y1 = cell_id[1] + self.COMPASS[dir][1]
+        if (x1 == goal[0]) and (y1 == goal[1]):
+            return True
+        test = goal
 
         # if cell is still within bounds after the move
         if self.is_within_bound(x1, y1):
